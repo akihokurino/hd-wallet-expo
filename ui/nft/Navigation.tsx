@@ -15,7 +15,13 @@ const Stack = createStackNavigator<NftStackParam>();
 export const NftStackNavigator = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="NftList" component={NftListScreen} />
+      <Stack.Screen
+        name="NftList"
+        component={NftListScreen}
+        options={({ route }) => ({
+          title: "NFT",
+        })}
+      />
     </Stack.Navigator>
   );
 };

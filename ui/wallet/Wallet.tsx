@@ -1,4 +1,6 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { PrimaryColor } from "../colors";
+import { IconButton } from "../components/IconButton";
 import { WalletNavigationProp } from "./Navigation";
 
 interface Props {
@@ -8,20 +10,33 @@ interface Props {
 export const WalletScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View>
-      <Text style={styles.account}>Account1</Text>
+      <Text style={styles.accountText}>Account1</Text>
       <View style={styles.balance}>
         <Text style={styles.balanceText}>10 Ether</Text>
       </View>
-      <Button
-        title="Go to First Details"
-        onPress={() => navigation.navigate("SendEther")}
-      />
+      <Text style={styles.addressText}>
+        0x1341048E3d37046Ca18A09EFB154Ea9771744f41
+      </Text>
+      <View style={styles.buttons}>
+        <IconButton
+          icon={"arrowdown"}
+          text={"Receive"}
+          handlePress={() => {}}
+        />
+        <IconButton
+          icon={"arrowup"}
+          text={"Send"}
+          handlePress={() => {
+            navigation.navigate("SendEther");
+          }}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  account: {
+  accountText: {
     color: "#000",
     fontWeight: "bold",
     fontSize: 16,
@@ -30,7 +45,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   balance: {
-    backgroundColor: "#3078F2",
+    backgroundColor: PrimaryColor,
     maxWidth: "100%",
     height: 60,
     marginTop: 20,
@@ -44,5 +59,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: "center",
     lineHeight: 60,
+  },
+  addressText: {
+    color: "#000",
+    fontWeight: "normal",
+    fontSize: 12,
+    width: "100%",
+    textAlign: "center",
+    marginTop: 40,
+  },
+  buttons: {
+    marginTop: 60,
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
