@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { PrimaryColor } from "../colors";
+import { PrimaryColor } from "../Colors";
 import { IconButton } from "../components/IconButton";
 import { WalletNavigationProp } from "./Navigation";
 
@@ -9,7 +9,7 @@ interface Props {
 
 export const WalletScreen: React.FC<Props> = ({ navigation }) => {
   return (
-    <View>
+    <View style={styles.container}>
       <Text style={styles.accountText}>Account1</Text>
       <View style={styles.balance}>
         <Text style={styles.balanceText}>10 Ether</Text>
@@ -36,6 +36,10 @@ export const WalletScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 15,
+  },
   accountText: {
     color: "#000",
     fontWeight: "bold",
@@ -49,8 +53,6 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     height: 60,
     marginTop: 20,
-    marginRight: 15,
-    marginLeft: 15,
     borderRadius: 4,
   },
   balanceText: {

@@ -1,6 +1,6 @@
 import { AntDesign } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { PrimaryColor } from "../colors";
+import { PrimaryColor } from "../Colors";
 
 interface Props {
   icon: any;

@@ -4,7 +4,7 @@ import {
   createStackNavigator,
 } from "@react-navigation/stack";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { PrimaryColor } from "../colors";
+import { PrimaryColor } from "../Colors";
 import { SendEtherScreen } from "./SendEther";
 import { WalletScreen } from "./Wallet";
 
