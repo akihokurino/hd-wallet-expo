@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
 import Modal from "react-native-modal";
 import { Snackbar } from "react-native-paper";
+import { useLoading } from "../../context/LoadingProvider";
 import { PrimaryColor } from "../Colors";
 import { ActionSheetItem } from "../components/ActionSheetItem";
 import { IconButton } from "../components/IconButton";
@@ -21,6 +22,7 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
   const actionSheetRef = useRef<ActionSheetRef>(null);
   const [modalVisible, setModalVisible] = useState<ModalType | null>(null);
   const [secretValue, setSecretValue] = useState<string>("");
+  const { setIsLoading } = useLoading();
 
   useEffect(() => {
     if (route.params?.showActionSheet) {
@@ -106,6 +108,11 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
           destructive={true}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
+
+            setIsLoading(true);
+            setTimeout(() => {
+              setIsLoading(false);
+            }, 3000);
           }}
         />
       </ActionSheet>
