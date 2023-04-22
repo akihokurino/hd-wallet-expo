@@ -2,16 +2,27 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { PrimaryColor } from "../Colors";
 
 interface Props {
-  width: number;
   text: string;
+  destructive?: boolean;
   handlePress: () => void;
 }
 
-export const ActionButton: React.FC<Props> = ({ width, text, handlePress }) => {
+export const ActionSheetItem: React.FC<Props> = ({
+  text,
+  destructive = false,
+  handlePress,
+}) => {
   return (
     <TouchableOpacity onPress={handlePress}>
-      <View style={[styles.container, { width }]}>
-        <Text style={styles.buttonText}>{text}</Text>
+      <View style={[styles.container]}>
+        <Text
+          style={[
+            styles.text,
+            destructive ? { color: "red" } : { color: PrimaryColor },
+          ]}
+        >
+          {text}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -19,15 +30,15 @@ export const ActionButton: React.FC<Props> = ({ width, text, handlePress }) => {
 
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
     height: 50,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: PrimaryColor,
-    borderRadius: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
   },
-  buttonText: {
-    color: "#fff",
+  text: {
     fontWeight: "bold",
     fontSize: 15,
   },

@@ -11,7 +11,7 @@ interface Props {
 export const IconButton: React.FC<Props> = ({ icon, text, handlePress }) => {
   return (
     <TouchableOpacity onPress={handlePress}>
-      <View style={styles.iconButtonContainer}>
+      <View style={styles.container}>
         <View style={styles.iconButton}>
           <AntDesign name={icon} size={20} color={"#fff"} />
         </View>
@@ -23,7 +23,7 @@ export const IconButton: React.FC<Props> = ({ icon, text, handlePress }) => {
 };
 
 const styles = StyleSheet.create({
-  iconButtonContainer: {
+  container: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",

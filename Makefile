@@ -1,5 +1,5 @@
 vendor:
 	yarn install
 
-local-run:
+run-local:
 	expo start

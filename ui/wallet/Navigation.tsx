@@ -1,4 +1,5 @@
 import { AntDesign } from "@expo/vector-icons";
+import { RouteProp } from "@react-navigation/native";
 import {
   StackNavigationProp,
   createStackNavigator,
@@ -9,10 +10,11 @@ import { SendEtherScreen } from "./SendEther";
 import { WalletScreen } from "./Wallet";
 
 type WalletStackParam = {
-  Wallet: undefined;
+  Wallet: { showActionSheet?: boolean };
   SendEther: undefined;
 };
 
+export type WalletRouteProp = RouteProp<WalletStackParam, "Wallet">;
 export type WalletNavigationProp = StackNavigationProp<
   WalletStackParam,
   "Wallet"
@@ -31,10 +33,15 @@ export const WalletStackNavigator = () => {
       <Stack.Screen
         name="Wallet"
         component={WalletScreen}
-        options={({ route }) => ({
+        options={({ navigation }) => ({
           title: "Mumbai Network",
           headerRight: () => (
-            <TouchableOpacity onPress={() => {}} style={styles.menuButton}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.setParams({ showActionSheet: true });
+              }}
+              style={styles.menuButton}
+            >
               <AntDesign name="ellipsis1" size={24} color={PrimaryColor} />
             </TouchableOpacity>
           ),
