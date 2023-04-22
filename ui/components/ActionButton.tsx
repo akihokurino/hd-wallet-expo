@@ -1,16 +1,33 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { PrimaryColor } from "../Colors";
+import { AlertColor, PrimaryColor } from "../Colors";
+
+type ActionType = "normal" | "alert";
 
 interface Props {
   width: number;
   text: string;
+  actionType?: ActionType;
   handlePress: () => void;
 }
 
-export const ActionButton: React.FC<Props> = ({ width, text, handlePress }) => {
+export const ActionButton: React.FC<Props> = ({
+  width,
+  text,
+  actionType = "normal",
+  handlePress,
+}) => {
+  let backgroundColor = PrimaryColor;
+  switch (actionType) {
+    case "normal":
+      backgroundColor = PrimaryColor;
+      break;
+    case "alert":
+      backgroundColor = AlertColor;
+      break;
+  }
   return (
     <TouchableOpacity onPress={handlePress}>
-      <View style={[styles.container, { width }]}>
+      <View style={[styles.container, { width, backgroundColor }]}>
         <Text style={styles.buttonText}>{text}</Text>
       </View>
     </TouchableOpacity>
@@ -23,7 +40,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: PrimaryColor,
     borderRadius: 4,
   },
   buttonText: {

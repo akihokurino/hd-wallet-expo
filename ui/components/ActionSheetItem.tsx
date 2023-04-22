@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { PrimaryColor } from "../Colors";
+import { AlertColor, PrimaryColor } from "../Colors";
 
 interface Props {
   text: string;
@@ -18,7 +18,7 @@ export const ActionSheetItem: React.FC<Props> = ({
         <Text
           style={[
             styles.text,
-            destructive ? { color: "red" } : { color: PrimaryColor },
+            destructive ? { color: AlertColor } : { color: PrimaryColor },
           ]}
         >
           {text}

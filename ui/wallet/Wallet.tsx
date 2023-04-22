@@ -7,6 +7,7 @@ import { PrimaryColor } from "../Colors";
 import { ActionSheetItem } from "../components/ActionSheetItem";
 import { IconButton } from "../components/IconButton";
 import { SelectItem } from "../components/SelectItem";
+import { ManageKey } from "./ManageKey";
 import { WalletNavigationProp, WalletRouteProp } from "./Navigation";
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
   route: WalletRouteProp;
 }
 
-type ModalType = "SelectAccount" | "SelectNetwork";
+type ModalType = "SelectAccount" | "SelectNetwork" | "ManageKey";
 
 export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
   const actionSheetRef = useRef<ActionSheetRef>(null);
@@ -77,6 +78,9 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
           text={"Import Key"}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
+            setTimeout(() => {
+              setModalVisible("ManageKey");
+            }, 1000);
           }}
         />
         <ActionSheetItem
@@ -113,6 +117,7 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
       >
         {modalVisible === "SelectAccount" && <SelectItem />}
         {modalVisible === "SelectNetwork" && <SelectItem />}
+        {modalVisible === "ManageKey" && <ManageKey />}
       </Modal>
 
       <Snackbar
@@ -180,7 +185,7 @@ const styles = StyleSheet.create({
   },
   modal: {
     margin: 0,
-    marginTop: 300,
+    marginTop: 100,
   },
   secretModal: {
     marginTop: 300,
