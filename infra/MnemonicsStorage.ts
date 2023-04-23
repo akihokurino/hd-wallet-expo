@@ -1,8 +1,8 @@
 // セキュリティは気にせずに永続化をする
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export class BIP32KeystoreStorage {
-  static key: string = "bip32-keystore";
+export class MnemonicsStorage {
+  static key: string = "mnemonics";
 
   static getItem = async (): Promise<string | null> => {
     try {
