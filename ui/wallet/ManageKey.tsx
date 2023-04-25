@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useWallet } from "../../context/WalletProvider";
 import { ActionButton } from "../components/ActionButton";
 import { TextField } from "../components/TextField";
@@ -15,71 +23,75 @@ export const ManageKey: React.FC<Props> = ({ dismiss }) => {
   const { addChildAccount, importAccount, restoreWallet } = useWallet();
 
   return (
-    <View style={styles.container}>
-      <View style={{ marginTop: 40 }} />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAwareScrollView style={styles.container}>
+        <View style={{ marginTop: 40 }} />
 
-      <Text style={styles.descriptionText}>
-        Generate a private key. The generated private key is stored in the app.
-      </Text>
-      <View style={{ marginTop: 10 }} />
-      <ActionButton
-        width={screenWidth - 30}
-        text={"Generate"}
-        handlePress={() => {
-          addChildAccount();
-          dismiss();
-        }}
-      />
+        <Text style={styles.descriptionText}>
+          Generate a private key. The generated private key is stored in the
+          app.
+        </Text>
+        <View style={{ marginTop: 10 }} />
+        <ActionButton
+          width={screenWidth - 30}
+          text={"Generate"}
+          handlePress={() => {
+            addChildAccount();
+            dismiss();
+          }}
+        />
 
-      <View style={{ marginTop: 40 }} />
+        <View style={{ marginTop: 40 }} />
 
-      <Text style={styles.descriptionText}>
-        Import your private key. The imported private key is stored in the app.
-      </Text>
-      <View style={{ marginTop: 10 }} />
-      <TextField
-        width={screenWidth - 30}
-        keyboard="email-address"
-        placeholder={"private key..."}
-        onChangeText={(text) => {
-          setPrivateKey(text);
-        }}
-      />
-      <View style={{ marginTop: 10 }} />
-      <ActionButton
-        width={screenWidth - 30}
-        text={"Import"}
-        handlePress={() => {
-          importAccount(privateKey);
-          dismiss();
-        }}
-      />
+        <Text style={styles.descriptionText}>
+          Import your private key. The imported private key is stored in the
+          app.
+        </Text>
+        <View style={{ marginTop: 10 }} />
+        <TextField
+          width={screenWidth - 30}
+          keyboard="email-address"
+          placeholder={"private key..."}
+          onChangeText={(text) => {
+            setPrivateKey(text);
+          }}
+        />
+        <View style={{ marginTop: 10 }} />
+        <ActionButton
+          width={screenWidth - 30}
+          text={"Import"}
+          handlePress={() => {
+            importAccount(privateKey);
+            dismiss();
+          }}
+        />
 
-      <View style={{ marginTop: 40 }} />
+        <View style={{ marginTop: 40 }} />
 
-      <Text style={styles.descriptionText}>
-        Recover private key from mnemonic.
-      </Text>
-      <View style={{ marginTop: 10 }} />
-      <TextField
-        width={screenWidth - 30}
-        keyboard="email-address"
-        placeholder={"patrol moment olive ..."}
-        onChangeText={(text) => {
-          setMnemonics(text);
-        }}
-      />
-      <View style={{ marginTop: 10 }} />
-      <ActionButton
-        width={screenWidth - 30}
-        text={"Restore"}
-        actionType="alert"
-        handlePress={() => {
-          restoreWallet(mnemonics);
-          dismiss();
-        }}
-      />
-    </View>
+        <Text style={styles.descriptionText}>
+          Recover private key from mnemonic.
+        </Text>
+        <View style={{ marginTop: 10 }} />
+        <TextField
+          width={screenWidth - 30}
+          keyboard="email-address"
+          placeholder={"patrol moment olive ..."}
+          onChangeText={(text) => {
+            setMnemonics(text);
+          }}
+        />
+        <View style={{ marginTop: 10 }} />
+        <ActionButton
+          width={screenWidth - 30}
+          text={"Restore"}
+          actionType="alert"
+          handlePress={() => {
+            restoreWallet(mnemonics);
+            dismiss();
+          }}
+        />
+      </KeyboardAwareScrollView>
+    </TouchableWithoutFeedback>
   );
 };
 

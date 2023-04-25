@@ -15,7 +15,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "app.akiho.hd-wallet"
     },
     "android": {
       "adaptiveIcon": {
