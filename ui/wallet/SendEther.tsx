@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { useWallet } from "../../context/WalletProvider";
 import { ActionButton } from "../components/ActionButton";
 import { TextField } from "../components/TextField";
 import { SendEtherNavigationProp } from "./Navigation";
@@ -9,14 +11,17 @@ interface Props {
 
 export const SendEtherScreen: React.FC<Props> = ({ navigation }) => {
   const screenWidth = Dimensions.get("window").width;
+  const [toAddress, setToAddress] = useState<string>("");
+  const [ether, setEther] = useState<string>("");
+  const { primaryAccount, balance, sendEther } = useWallet();
 
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>From:</Text>
         <View>
-          <Text style={styles.accountText}>Account1</Text>
-          <Text>Balance: 20.00000 Matic</Text>
+          <Text style={styles.accountText}>{primaryAccount?.name}</Text>
+          <Text>Balance: {balance} Matic</Text>
         </View>
       </View>
       <View style={styles.inputContainer}>
@@ -25,7 +30,9 @@ export const SendEtherScreen: React.FC<Props> = ({ navigation }) => {
           width={screenWidth - 30 - 80}
           keyboard="email-address"
           placeholder={"0x00.."}
-          onChangeText={(text) => {}}
+          onChangeText={(text) => {
+            setToAddress(text);
+          }}
         />
       </View>
       <View style={styles.inputContainer}>
@@ -34,7 +41,9 @@ export const SendEtherScreen: React.FC<Props> = ({ navigation }) => {
           width={screenWidth - 30 - 80}
           keyboard="decimal-pad"
           placeholder={"0.1"}
-          onChangeText={(text) => {}}
+          onChangeText={(text) => {
+            setEther(text);
+          }}
         />
       </View>
 
@@ -43,7 +52,10 @@ export const SendEtherScreen: React.FC<Props> = ({ navigation }) => {
       <ActionButton
         width={screenWidth - 30}
         text="Send"
-        handlePress={() => {}}
+        handlePress={async () => {
+          await sendEther(ether, toAddress);
+          navigation.goBack();
+        }}
       />
     </View>
   );

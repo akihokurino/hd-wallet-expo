@@ -1,11 +1,17 @@
+import { useState } from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { useWallet } from "../../context/WalletProvider";
 import { ActionButton } from "../components/ActionButton";
 import { TextField } from "../components/TextField";
 
-interface Props {}
+interface Props {
+  dismiss: () => void;
+}
 
-export const ManageKey: React.FC<Props> = ({}) => {
+export const ManageKey: React.FC<Props> = ({ dismiss }) => {
   const screenWidth = Dimensions.get("window").width;
+  const [mnemonics, setMnemonics] = useState<string>("");
+  const { addChildWallet, restoreWallet } = useWallet();
 
   return (
     <View style={styles.container}>
@@ -18,7 +24,10 @@ export const ManageKey: React.FC<Props> = ({}) => {
       <ActionButton
         width={screenWidth - 30}
         text={"Generate"}
-        handlePress={() => {}}
+        handlePress={() => {
+          addChildWallet();
+          dismiss();
+        }}
       />
 
       <View style={{ marginTop: 40 }} />
@@ -43,14 +52,19 @@ export const ManageKey: React.FC<Props> = ({}) => {
         width={screenWidth - 30}
         keyboard="email-address"
         placeholder={"patrol moment olive ..."}
-        onChangeText={(text) => {}}
+        onChangeText={(text) => {
+          setMnemonics(text);
+        }}
       />
       <View style={{ marginTop: 10 }} />
       <ActionButton
         width={screenWidth - 30}
         text={"Restore"}
         actionType="alert"
-        handlePress={() => {}}
+        handlePress={() => {
+          restoreWallet(mnemonics);
+          dismiss();
+        }}
       />
     </View>
   );

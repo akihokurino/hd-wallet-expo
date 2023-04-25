@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
 import Modal from "react-native-modal";
 import { Snackbar } from "react-native-paper";
-import { useLoading } from "../../context/LoadingProvider";
+import { useWallet } from "../../context/WalletProvider";
 import { PrimaryColor } from "../Colors";
 import { ActionSheetItem } from "../components/ActionSheetItem";
 import { IconButton } from "../components/IconButton";
@@ -22,7 +22,7 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
   const actionSheetRef = useRef<ActionSheetRef>(null);
   const [modalVisible, setModalVisible] = useState<ModalType | null>(null);
   const [secretValue, setSecretValue] = useState<string>("");
-  const { setIsLoading } = useLoading();
+  const { primaryAccount, balance } = useWallet();
 
   useEffect(() => {
     if (route.params?.showActionSheet) {
@@ -34,13 +34,11 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.inner}>
-        <Text style={styles.accountText}>Account1</Text>
+        <Text style={styles.accountText}>{primaryAccount?.name}</Text>
         <View style={styles.balance}>
-          <Text style={styles.balanceText}>10 Ether</Text>
+          <Text style={styles.balanceText}>{balance} MATIC</Text>
         </View>
-        <Text style={styles.addressText}>
-          0x1341048E3d37046Ca18A09EFB154Ea9771744f41
-        </Text>
+        <Text style={styles.addressText}>{primaryAccount?.address}</Text>
         <View style={styles.buttons}>
           <IconButton
             icon={"arrowdown"}
@@ -64,15 +62,6 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
             actionSheetRef.current?.setModalVisible(false);
             setTimeout(() => {
               setModalVisible("SelectAccount");
-            }, 1000);
-          }}
-        />
-        <ActionSheetItem
-          text={"Select Network"}
-          handlePress={() => {
-            actionSheetRef.current?.setModalVisible(false);
-            setTimeout(() => {
-              setModalVisible("SelectNetwork");
             }, 1000);
           }}
         />
@@ -108,11 +97,6 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
           destructive={true}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
-
-            setIsLoading(true);
-            setTimeout(() => {
-              setIsLoading(false);
-            }, 3000);
           }}
         />
       </ActionSheet>
@@ -124,7 +108,13 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
       >
         {modalVisible === "SelectAccount" && <SelectItem />}
         {modalVisible === "SelectNetwork" && <SelectItem />}
-        {modalVisible === "ManageKey" && <ManageKey />}
+        {modalVisible === "ManageKey" && (
+          <ManageKey
+            dismiss={() => {
+              setModalVisible(null);
+            }}
+          />
+        )}
       </Modal>
 
       <Snackbar
