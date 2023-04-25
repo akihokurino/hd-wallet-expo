@@ -3,23 +3,37 @@ import { StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { PrimaryColor } from "../Colors";
 
-interface Props {}
+export interface SelectItemData {
+  id: string;
+  name: string;
+}
 
-export const SelectItem: React.FC<Props> = ({}) => {
+interface Props {
+  current: string;
+  items: SelectItemData[];
+  onSelect: (id: string) => void;
+}
+
+export const SelectItem: React.FC<Props> = ({ current, items, onSelect }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => {}}>
-        <View style={[styles.itemContainer]}>
-          <Text style={styles.itemText}>{"Item1"}</Text>
-          <AntDesign name="checkcircleo" size={24} color={PrimaryColor} />
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => {}}>
-        <View style={[styles.itemContainer]}>
-          <Text style={styles.itemText}>{"Item2"}</Text>
-          <AntDesign name="checkcircleo" size={24} color={PrimaryColor} />
-        </View>
-      </TouchableOpacity>
+      {items.map((item) => (
+        <TouchableOpacity
+          key={item.id}
+          onPress={() => {
+            onSelect(item.id);
+          }}
+        >
+          <View style={[styles.itemContainer]}>
+            <Text style={styles.itemText}>{item.name}</Text>
+            <AntDesign
+              name="checkcircleo"
+              size={24}
+              color={item.id === current ? PrimaryColor : "gray"}
+            />
+          </View>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };

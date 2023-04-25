@@ -7,7 +7,7 @@ import { useWallet } from "../../context/WalletProvider";
 import { PrimaryColor } from "../Colors";
 import { ActionSheetItem } from "../components/ActionSheetItem";
 import { IconButton } from "../components/IconButton";
-import { SelectItem } from "../components/SelectItem";
+import { SelectItem, SelectItemData } from "../components/SelectItem";
 import { ManageKey } from "./ManageKey";
 import { WalletNavigationProp, WalletRouteProp } from "./Navigation";
 
@@ -16,13 +16,21 @@ interface Props {
   route: WalletRouteProp;
 }
 
-type ModalType = "SelectAccount" | "SelectNetwork" | "ManageKey";
+type ModalType = "SelectAccount" | "ManageKey";
 
 export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
   const actionSheetRef = useRef<ActionSheetRef>(null);
   const [modalVisible, setModalVisible] = useState<ModalType | null>(null);
   const [secretValue, setSecretValue] = useState<string>("");
-  const { primaryAccount, balance } = useWallet();
+  const {
+    accounts,
+    primaryAccount,
+    balance,
+    changeAccount,
+    exportMnemonics,
+    exportPrivateKey,
+    reset,
+  } = useWallet();
 
   useEffect(() => {
     if (route.params?.showActionSheet) {
@@ -78,18 +86,18 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
           text={"Export Key"}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
-            setTimeout(() => {
-              setSecretValue("private key....");
-            }, 1000);
+            exportPrivateKey().then((val) => {
+              setSecretValue(val);
+            });
           }}
         />
         <ActionSheetItem
           text={"Export Mnemonics"}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
-            setTimeout(() => {
-              setSecretValue("mnemonics....");
-            }, 1000);
+            exportMnemonics().then((val) => {
+              setSecretValue(val);
+            });
           }}
         />
         <ActionSheetItem
@@ -97,6 +105,7 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
           destructive={true}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
+            reset();
           }}
         />
       </ActionSheet>
@@ -106,8 +115,23 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
         onBackdropPress={() => setModalVisible(null)}
         style={styles.modal}
       >
-        {modalVisible === "SelectAccount" && <SelectItem />}
-        {modalVisible === "SelectNetwork" && <SelectItem />}
+        {modalVisible === "SelectAccount" && (
+          <SelectItem
+            current={primaryAccount?.address ?? ""}
+            items={accounts.map((account): SelectItemData => {
+              return {
+                id: account.address,
+                name: account.name,
+              };
+            })}
+            onSelect={(id: string) => {
+              changeAccount(
+                accounts.filter((account) => account.address === id)[0]
+              );
+              setModalVisible(null);
+            }}
+          />
+        )}
         {modalVisible === "ManageKey" && (
           <ManageKey
             dismiss={() => {

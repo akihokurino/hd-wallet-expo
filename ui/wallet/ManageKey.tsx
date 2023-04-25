@@ -10,8 +10,9 @@ interface Props {
 
 export const ManageKey: React.FC<Props> = ({ dismiss }) => {
   const screenWidth = Dimensions.get("window").width;
+  const [privateKey, setPrivateKey] = useState<string>("");
   const [mnemonics, setMnemonics] = useState<string>("");
-  const { addChildWallet, restoreWallet } = useWallet();
+  const { addChildAccount, importAccount, restoreWallet } = useWallet();
 
   return (
     <View style={styles.container}>
@@ -25,7 +26,7 @@ export const ManageKey: React.FC<Props> = ({ dismiss }) => {
         width={screenWidth - 30}
         text={"Generate"}
         handlePress={() => {
-          addChildWallet();
+          addChildAccount();
           dismiss();
         }}
       />
@@ -36,10 +37,22 @@ export const ManageKey: React.FC<Props> = ({ dismiss }) => {
         Import your private key. The imported private key is stored in the app.
       </Text>
       <View style={{ marginTop: 10 }} />
+      <TextField
+        width={screenWidth - 30}
+        keyboard="email-address"
+        placeholder={"private key..."}
+        onChangeText={(text) => {
+          setPrivateKey(text);
+        }}
+      />
+      <View style={{ marginTop: 10 }} />
       <ActionButton
         width={screenWidth - 30}
         text={"Import"}
-        handlePress={() => {}}
+        handlePress={() => {
+          importAccount(privateKey);
+          dismiss();
+        }}
       />
 
       <View style={{ marginTop: 40 }} />

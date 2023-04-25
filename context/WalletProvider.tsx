@@ -12,7 +12,11 @@ import {
   useState,
 } from "react";
 import { ActivityIndicator, InteractionManager, View } from "react-native";
-import { AccountStorage, PrimaryAccountStorage } from "../infra/AccountStorage";
+import {
+  AccountListStorage,
+  ExternalAccountListStorage,
+  PrimaryAccountStorage,
+} from "../infra/AccountStorage";
 import { MnemonicsStorage } from "../infra/MnemonicsStorage";
 import { WalletStorage } from "../infra/WalletStorage";
 import { Account } from "../model/Account";
@@ -26,11 +30,15 @@ interface WalletContextValue {
   accounts: Account[];
   primaryAccount?: Account;
   balance: string;
-  addChildWallet: () => Promise<void>;
+  addChildAccount: () => Promise<void>;
+  importAccount: (privateKey: string) => Promise<void>;
   restoreWallet: (mnemonics: string) => Promise<void>;
   changeAccount: (account: Account) => Promise<void>;
   getBalance: (account: Account) => Promise<void>;
   sendEther: (ether: string, to: string) => Promise<void>;
+  exportMnemonics: () => Promise<string>;
+  exportPrivateKey: () => Promise<string>;
+  reset: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextValue>({
@@ -38,11 +46,19 @@ const WalletContext = createContext<WalletContextValue>({
   accounts: [],
   primaryAccount: undefined,
   balance: "",
-  addChildWallet: async () => {},
+  addChildAccount: async () => {},
+  importAccount: async () => {},
   restoreWallet: async () => {},
   changeAccount: async () => {},
   getBalance: async () => {},
   sendEther: async () => {},
+  exportMnemonics: async () => {
+    return "";
+  },
+  exportPrivateKey: async () => {
+    return "";
+  },
+  reset: async () => {},
 });
 
 const password = "mypassword";
@@ -64,7 +80,6 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
       const mnemonics = await MnemonicsStorage.getItem();
 
       if (mnemonics) {
-        const accounts = (await AccountStorage.getItem())!;
         const account = (await PrimaryAccountStorage.getItem())!;
         const wallet = await ethers.Wallet.fromEncryptedJson(
           (await WalletStorage.getItem(account.address))!,
@@ -72,7 +87,7 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
         );
 
         setWallet(wallet);
-        setAccounts(accounts);
+        setAccounts(await getAllAccounts());
         setPrimaryAccount(account);
 
         await getBalance(account);
@@ -90,11 +105,11 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
           wallet.address,
           await wallet.encrypt(password)
         );
-        await AccountStorage.setItem([account]);
+        await AccountListStorage.setItem([account]);
         await PrimaryAccountStorage.setItem(account);
 
         setWallet(wallet);
-        setAccounts([account]);
+        setAccounts(await getAllAccounts());
         setPrimaryAccount(account);
 
         await getBalance(account);
@@ -106,11 +121,21 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
     }
   };
 
-  const addChild = async (): Promise<void> => {
+  const getAllAccounts = async (): Promise<Account[]> => {
+    const internalAccounts = (await AccountListStorage.getItem()) ?? [];
+    const externalAccounts = (await ExternalAccountListStorage.getItem()) ?? [];
+    const all = internalAccounts.concat(externalAccounts);
+    // const sorted = all.sort((a, b) => {
+    //   return a.createdAt.getTime() - b.createdAt.getTime();
+    // });
+    return all;
+  };
+
+  const addChildAccount = async (): Promise<void> => {
     setIsLoading(true);
 
     try {
-      let accounts = (await AccountStorage.getItem())!;
+      let accounts = (await AccountListStorage.getItem())!;
       const mnemonics = (await MnemonicsStorage.getItem())!;
       const hdNode = ethers.utils.HDNode.fromMnemonic(mnemonics);
       const walletHDNode = hdNode.derivePath(
@@ -119,7 +144,7 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
       const wallet = new ethers.Wallet(walletHDNode.privateKey);
       const account: Account = {
         address: wallet.address,
-        name: `Account${accounts.length + 1}`,
+        name: `Account${(await getAllAccounts()).length + 1}`,
         fromMnemonics: true,
         createdAt: new Date(),
       };
@@ -129,11 +154,11 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
         wallet.address,
         await wallet.encrypt(password)
       );
-      await AccountStorage.setItem(accounts);
+      await AccountListStorage.setItem(accounts);
       await PrimaryAccountStorage.setItem(account);
 
       setWallet(wallet);
-      setAccounts(accounts);
+      setAccounts(await getAllAccounts());
       setPrimaryAccount(account);
 
       await getBalance(account);
@@ -144,16 +169,51 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
     }
   };
 
-  const restore = async (mnemonics: string): Promise<void> => {
+  const importAccount = async (privateKey: string): Promise<void> => {
+    setIsLoading(true);
+
+    try {
+      let accounts = (await ExternalAccountListStorage.getItem()) ?? [];
+      const wallet = new ethers.Wallet(privateKey);
+      const account: Account = {
+        address: wallet.address,
+        name: `Account${(await getAllAccounts()).length + 1}`,
+        fromMnemonics: false,
+        createdAt: new Date(),
+      };
+      accounts.push(account);
+
+      await WalletStorage.setItem(
+        wallet.address,
+        await wallet.encrypt(password)
+      );
+      await ExternalAccountListStorage.setItem(accounts);
+      await PrimaryAccountStorage.setItem(account);
+
+      setWallet(wallet);
+      setAccounts(await getAllAccounts());
+      setPrimaryAccount(account);
+
+      await getBalance(account);
+    } catch (err) {
+      console.error(`error: ${err}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const restoreWallet = async (mnemonics: string): Promise<void> => {
     setIsLoading(true);
 
     try {
       await MnemonicsStorage.removeItem();
-      const accounts = (await AccountStorage.getItem())!;
+      const accounts = await getAllAccounts();
       for (let i in accounts) {
         await WalletStorage.removeItem(accounts[i].address);
       }
-      await AccountStorage.removeItem();
+      await AccountListStorage.removeItem();
+      await ExternalAccountListStorage.removeItem();
+      await PrimaryAccountStorage.removeItem();
 
       const wallet = await ethers.Wallet.fromMnemonic(mnemonics);
       const account: Account = {
@@ -168,11 +228,11 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
         wallet.address,
         await wallet.encrypt(password)
       );
-      await AccountStorage.setItem([account]);
+      await AccountListStorage.setItem([account]);
       await PrimaryAccountStorage.setItem(account);
 
       setWallet(wallet);
-      setAccounts([account]);
+      setAccounts(await getAllAccounts());
       setPrimaryAccount(account);
 
       await getBalance(account);
@@ -254,6 +314,36 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
     }
   };
 
+  const exportMnemonics = async (): Promise<string> => {
+    const mnemonics = await MnemonicsStorage.getItem();
+    return mnemonics ?? "";
+  };
+
+  const exportPrivateKey = async (): Promise<string> => {
+    if (!wallet) {
+      return "";
+    }
+
+    return wallet.privateKey;
+  };
+
+  const reset = async (): Promise<void> => {
+    await MnemonicsStorage.removeItem();
+    const accounts = await getAllAccounts();
+    for (let i in accounts) {
+      await WalletStorage.removeItem(accounts[i].address);
+    }
+    await AccountListStorage.removeItem();
+    await ExternalAccountListStorage.removeItem();
+    await PrimaryAccountStorage.removeItem();
+
+    setWallet(undefined);
+    setAccounts([]);
+    setPrimaryAccount(undefined);
+
+    await init();
+  };
+
   useEffect(() => {
     async function initialize() {
       InteractionManager.runAfterInteractions(() => {
@@ -268,14 +358,18 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
     <WalletContext.Provider
       value={{
         isLoading,
-        restoreWallet: restore,
-        addChildWallet: addChild,
+        restoreWallet,
+        addChildAccount,
+        importAccount,
         primaryAccount,
         accounts,
         balance,
         changeAccount,
         getBalance,
         sendEther,
+        exportMnemonics,
+        exportPrivateKey,
+        reset,
       }}
     >
       {children}
