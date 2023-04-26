@@ -3,7 +3,7 @@ import "react-native-get-random-values";
 // 順番が大事（ethersより前）
 import "@ethersproject/shims";
 
-import { ethers, Wallet } from "ethers";
+import { ethers } from "ethers";
 import {
   createContext,
   ReactNode,
@@ -66,7 +66,6 @@ const mumbaiRpcUrl = "https://rpc-mumbai.maticvigil.com";
 
 export const WalletProvider: React.FC<Props> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [wallet, setWallet] = useState<Wallet | undefined>(undefined);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [primaryAccount, setPrimaryAccount] = useState<Account | undefined>(
     undefined
@@ -81,18 +80,14 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
 
       if (mnemonics) {
         const account = (await PrimaryAccountStorage.getItem())!;
-        const wallet = await ethers.Wallet.fromEncryptedJson(
-          (await WalletStorage.getItem(account.address))!,
-          password
-        );
 
-        setWallet(wallet);
         setAccounts(await getAllAccounts());
         setPrimaryAccount(account);
 
         await getBalance(account);
       } else {
         const wallet = ethers.Wallet.createRandom();
+
         const account: Account = {
           address: wallet.address,
           name: "Account1",
@@ -108,7 +103,6 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
         await AccountListStorage.setItem([account]);
         await PrimaryAccountStorage.setItem(account);
 
-        setWallet(wallet);
         setAccounts(await getAllAccounts());
         setPrimaryAccount(account);
 
@@ -141,7 +135,9 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
       const walletHDNode = hdNode.derivePath(
         `m/44'/60'/0'/0/${accounts.length}`
       );
+
       const wallet = new ethers.Wallet(walletHDNode.privateKey);
+
       const account: Account = {
         address: wallet.address,
         name: `Account${(await getAllAccounts()).length + 1}`,
@@ -157,7 +153,6 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
       await AccountListStorage.setItem(accounts);
       await PrimaryAccountStorage.setItem(account);
 
-      setWallet(wallet);
       setAccounts(await getAllAccounts());
       setPrimaryAccount(account);
 
@@ -174,7 +169,9 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
 
     try {
       let accounts = (await ExternalAccountListStorage.getItem()) ?? [];
+
       const wallet = new ethers.Wallet(privateKey);
+
       const account: Account = {
         address: wallet.address,
         name: `Account${(await getAllAccounts()).length + 1}`,
@@ -190,7 +187,6 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
       await ExternalAccountListStorage.setItem(accounts);
       await PrimaryAccountStorage.setItem(account);
 
-      setWallet(wallet);
       setAccounts(await getAllAccounts());
       setPrimaryAccount(account);
 
@@ -216,6 +212,7 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
       await PrimaryAccountStorage.removeItem();
 
       const wallet = await ethers.Wallet.fromMnemonic(mnemonics);
+
       const account: Account = {
         address: wallet.address,
         name: "Account1",
@@ -231,7 +228,6 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
       await AccountListStorage.setItem([account]);
       await PrimaryAccountStorage.setItem(account);
 
-      setWallet(wallet);
       setAccounts(await getAllAccounts());
       setPrimaryAccount(account);
 
@@ -247,13 +243,8 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
     setIsLoading(true);
 
     try {
-      const wallet = await ethers.Wallet.fromEncryptedJson(
-        (await WalletStorage.getItem(account.address))!,
-        password
-      );
       await PrimaryAccountStorage.setItem(account);
 
-      setWallet(wallet);
       setPrimaryAccount(account);
 
       await getBalance(account);
@@ -285,13 +276,18 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
   };
 
   const sendEther = async (ether: string, to: string): Promise<void> => {
-    if (!wallet || !primaryAccount) {
+    if (!primaryAccount) {
       return;
     }
 
     setIsLoading(true);
 
     try {
+      const wallet = await ethers.Wallet.fromEncryptedJson(
+        (await WalletStorage.getItem(primaryAccount.address))!,
+        password
+      );
+
       // const provider = new ethers.providers.InfuraProvider(
       //   "mumbai",
       //   Constants.manifest!.extra!.infuraKey
@@ -320,9 +316,14 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
   };
 
   const exportPrivateKey = async (): Promise<string> => {
-    if (!wallet) {
+    if (!primaryAccount) {
       return "";
     }
+
+    const wallet = await ethers.Wallet.fromEncryptedJson(
+      (await WalletStorage.getItem(primaryAccount.address))!,
+      password
+    );
 
     return wallet.privateKey;
   };
@@ -337,7 +338,6 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
     await ExternalAccountListStorage.removeItem();
     await PrimaryAccountStorage.removeItem();
 
-    setWallet(undefined);
     setAccounts([]);
     setPrimaryAccount(undefined);
 
