@@ -86,18 +86,22 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
           text={"Export Key"}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
-            exportPrivateKey().then((val) => {
-              setSecretValue(val);
-            });
+            setTimeout(() => {
+              exportPrivateKey().then((val) => {
+                setSecretValue(val ?? "");
+              });
+            }, 1000);
           }}
         />
         <ActionSheetItem
           text={"Export Mnemonics"}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
-            exportMnemonics().then((val) => {
-              setSecretValue(val);
-            });
+            setTimeout(() => {
+              exportMnemonics().then((val) => {
+                setSecretValue(val);
+              });
+            }, 1000);
           }}
         />
         <ActionSheetItem
@@ -105,7 +109,9 @@ export const WalletScreen: React.FC<Props> = ({ navigation, route }) => {
           destructive={true}
           handlePress={() => {
             actionSheetRef.current?.setModalVisible(false);
-            reset();
+            setTimeout(() => {
+              reset();
+            }, 1000);
           }}
         />
       </ActionSheet>

@@ -37,7 +37,7 @@ interface WalletContextValue {
   getBalance: (account: Account) => Promise<void>;
   sendEther: (ether: string, to: string) => Promise<void>;
   exportMnemonics: () => Promise<string>;
-  exportPrivateKey: () => Promise<string>;
+  exportPrivateKey: () => Promise<string | undefined>;
   reset: () => Promise<void>;
 }
 
@@ -315,17 +315,25 @@ export const WalletProvider: React.FC<Props> = ({ children }) => {
     return mnemonics ?? "";
   };
 
-  const exportPrivateKey = async (): Promise<string> => {
+  const exportPrivateKey = async (): Promise<string | undefined> => {
     if (!primaryAccount) {
       return "";
     }
 
-    const wallet = await ethers.Wallet.fromEncryptedJson(
-      (await WalletStorage.getItem(primaryAccount.address))!,
-      password
-    );
+    setIsLoading(true);
 
-    return wallet.privateKey;
+    try {
+      const wallet = await ethers.Wallet.fromEncryptedJson(
+        (await WalletStorage.getItem(primaryAccount.address))!,
+        password
+      );
+
+      return wallet.privateKey;
+    } catch (err) {
+      console.error(`error: ${err}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const reset = async (): Promise<void> => {
